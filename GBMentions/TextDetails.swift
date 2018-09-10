@@ -7,3 +7,10 @@
 //
 
 import Foundation
+
+struct Details {
+    var startIndex: Int?
+    var length: Int?
+    var text: String?
+    var id: String?
+}
