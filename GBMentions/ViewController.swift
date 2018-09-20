@@ -54,14 +54,15 @@ class ViewController: UIViewController, UITextViewDelegate, UITableViewDataSourc
 
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        var text = textView.text
+        tableView.deselectRow(at: indexPath, animated: true)
+        let text = textView.text
         var detail =  textDetails[indexPath.row]
         let textAppend = detail.text!
         detail.length = textAppend.count
         detail.startIndex = (text?.count)! + 1
         self.arrayDetails.append(detail)
-        text?.append(textAppend)
-        self.textView.text = text
+        self.textView.insertText(detail.text!)
+        self.tableView.isHidden = true
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
@@ -78,22 +79,24 @@ class ViewController: UIViewController, UITextViewDelegate, UITableViewDataSourc
         
         let  char = text.cString(using: String.Encoding.utf8)!
         let isBackSpace = strcmp(char, "\\b")
-        
+    
         if isBackSpace == -92 {
             var length = 0
             for detail in arrayDetails{
                 length = detail.startIndex! + detail.length!
                 if length == (range.location + 2){
-                    var string = textView.text
-                    let range = string?.range(of: detail.text!)
-                    string?.removeSubrange(range!)
-                    self.textView.text = string
-                    break
+                    if let range = self.textView.text?.range(of: detail.text!){
+                        let arbitraryValue: Int = detail.startIndex!
+                        if let newPosition = textView.position(from: textView.beginningOfDocument, offset: arbitraryValue) {
+                            textView.selectedTextRange = textView.textRange(from: newPosition, to: newPosition)
+                        }
+                        self.textView.text?.removeSubrange(range)
+                    }
                 }
+                print(detail)
             }
             return true
         }
-        
         return true
     }
     
